@@ -1,535 +1,1210 @@
-#include "SYS_init.h"
 #include "DrvSYS.h"
 #include "DrvGPIO.h"
 #include "LCD_Driver.h"
 #include "ScanKey.h"
 #include "Seven_Segment.h"
-#include "NUC100Series.h"
-#include "MCU_init.h"
-#include "sprites.h"
-#include "Draw2D.h"
 #include <String.h>
-#include <stdio.h>
-#include <time.h>
-#include <stdlib.h>
 
-//------------------------------------------------------------------------------------------------------------------------------------
-/* -------------------- Function headers --------------- */
-//------------------------------------------------------------------------------------------------------------------------------------
-
-// User-defined functions
-int randInt(int max);
-void displayWelcome();
-void playGame();
-void getReady();
-void gameOver();
-void displayTutorial();
-void clearActiveSprite();
-void drawGroundSprites();
-void scanKeyPad();
-
-// System functions
-void System_Config(void);
-void SPI3_Config(void);
-void LCD_start(void);
-void LCD_command(unsigned char temp);
-void LCD_data(unsigned char temp);
-void LCD_clear(void); 
-void LCD_SetAddress(uint8_t PageAddr, uint8_t ColumnAddr);
-void KeyPadEnable(void);
-uint8_t KeyPadScanning(void);
-void SysTickDelay(uint32_t SYSTICK_LVR);
+int j, k, i, angka, sat, pul, rat, rib, angka1, sat1, pul1, rat1, rib1, nilai;
+int waktu = 300;
+int a = 0;
+int life = 5;
+int adc;
+int tegangan;
+unsigned char temp;
 
 
+//Apel
+void panah_kanan(void){
+	SetPACA(2, 54);
+    WriteData(0b11100000);
+    SetPACA(2, 55);
+    WriteData(0b11100000);
+    SetPACA(2, 56);
+    WriteData(0b11100000);
+    SetPACA(2, 57);
+    WriteData(0b11100000);
+	SetPACA(2, 58);
+    WriteData(0b11100000);
+    SetPACA(2, 59);
+    WriteData(0b11100000);
+    SetPACA(2, 61);
+    WriteData(0b11111100);
+    SetPACA(2, 62);
+    WriteData(0b11111100);
+    SetPACA(2, 63);
+    WriteData(0b11111100);
+	SetPACA(2, 64);
+    WriteData(0b11100000);
+    SetPACA(2, 65);
+    WriteData(0b11100000);
+	SetPACA(2, 66);
+    WriteData(0b11100000);
+	SetPACA(2, 67);
+    WriteData(0b11100000);
+    SetPACA(2, 68);
+    WriteData(0b11100000);
+	SetPACA(2, 69);
+    WriteData(0b11100000);
+	SetPACA(2, 70);
+    WriteData(0b11000000);
+    SetPACA(2, 71);
+    WriteData(0b11000000);
+	SetPACA(2, 72);
+    WriteData(0b10000000);
 
-//------------------------------------------------------------------------------------------------------------------------------------
-/* -------------------- Global variables --------------- */
-//------------------------------------------------------------------------------------------------------------------------------------
+	SetPACA(3, 48);
+    WriteData(0b11110000);
+    SetPACA(3, 49);
+    WriteData(0b11110000);
+    SetPACA(3, 50);
+    WriteData(0b00001000);
+    SetPACA(3, 51);
+    WriteData(0b00000111);
+	SetPACA(3, 52);
+    WriteData(0b00000111);
+    SetPACA(3, 53);
+    WriteData(0b00000111);
+    SetPACA(3, 54);
+    WriteData(0b00110000);
+    SetPACA(3, 60);
+    WriteData(0b00000001);
+    SetPACA(3, 61);
+    WriteData(0b00000111);
+    SetPACA(3, 62);
+    WriteData(0b00000111);
+    SetPACA(3, 63);
+    WriteData(0b00000111);
+    SetPACA(3, 64);
+    WriteData(0b00000111);
+    SetPACA(3, 71);
+    WriteData(0b00000011);
+    SetPACA(3, 72);
+    WriteData(0b00000111);
+    SetPACA(3, 73);
+    WriteData(0b00001000);
+    SetPACA(3, 74);
+    WriteData(0b00001000);
+    SetPACA(3, 75);
+    WriteData(0b11110000);
 
-typedef enum
-{
-	WELCOME_SCR,
-	TUTORIAL_SCR,
-	READY_SCR,
-	GAMEPLAY,
-	GAMEOVER
-} STATES;
+    SetPACA(4, 48);
+    WriteData(0b00011111);
+    SetPACA(4, 49);
+    WriteData(0b00011111);
+    SetPACA(4, 50);
+    WriteData(0b11100000);
+    SetPACA(4, 73);
+    WriteData(0b11000000);
+    SetPACA(4, 74);
+    WriteData(0b11100000);
+    SetPACA(4, 75);
+    WriteData(0b00011111);
 
-STATES gameState;
+    SetPACA(5, 50);
+    WriteData(0b00000011);
+    SetPACA(5, 51);
+    WriteData(0b00001100);
+    SetPACA(5, 52);
+    WriteData(0b00001100);
+    SetPACA(5, 53);
+    WriteData(0b00001000);
+    SetPACA(5, 54);
+    WriteData(0b00110000);
+    SetPACA(5, 55);
+    WriteData(0b00110000);
+    SetPACA(5, 56);
+    WriteData(0b00110000);
+    SetPACA(5, 57);
+    WriteData(0b00100000);
+    SetPACA(5, 58);
+    WriteData(0b11000000);
+    SetPACA(5, 59);
+    WriteData(0b11000000);
+    SetPACA(5, 60);
+    WriteData(0b11000000);
+    SetPACA(5, 61);
+    WriteData(0b11000000);
+    SetPACA(5, 62);
+    WriteData(0b11000000);
+    SetPACA(5, 63);
+    WriteData(0b11000000);
+    SetPACA(5, 64);
+    WriteData(0b11000000);
+    SetPACA(5, 65);
+    WriteData(0b11000000);
+    SetPACA(5, 66);
+    WriteData(0b11000000);
+    SetPACA(5, 67);
+    WriteData(0b00100000);
+    SetPACA(5, 68);
+    WriteData(0b00110000);
+    SetPACA(5, 69);
+    WriteData(0b00110000);
+    SetPACA(5, 70);
+    WriteData(0b00110000);
+    SetPACA(5, 71);
+    WriteData(0b00001100);
+    SetPACA(5, 72);
+    WriteData(0b00001100);
+    SetPACA(5, 73);
+    WriteData(0b00000011);
+    SetPACA(5, 74);
+    WriteData(0b00000011);
 
-int score = 0;
-int lives = 5;
-int spriteDelayTime = 4000000;
-int randomIndex;
-int highScore = 0;
+}
 
-char scoreChar[3];
-char highScoreChar[3];
-char livesChar[2];
+//Strawberry
+void panah_kiri(void){
+	SetPACA(2, 50);
+    WriteData(0b10000000);
+    SetPACA(2, 51);
+    WriteData(0b11000000);
+    SetPACA(2, 52);
+    WriteData(0b11000000);
+    SetPACA(2, 53);
+    WriteData(0b11100000);
+	SetPACA(2, 54);
+    WriteData(0b11100000);
+    SetPACA(2, 55);
+    WriteData(0b11111000);
+    SetPACA(2, 56);
+    WriteData(0b11111000);
+    SetPACA(2, 57);
+    WriteData(0b11111000);
+    SetPACA(2, 58);
+    WriteData(0b11111000);
+	SetPACA(2, 59);
+    WriteData(0b11111000);
+    SetPACA(2, 60);
+    WriteData(0b11111000);
+	SetPACA(2, 61);
+    WriteData(0b11111110);
+	SetPACA(2, 62);
+    WriteData(0b11111110);
+    SetPACA(2, 63);
+    WriteData(0b11111110);
+	SetPACA(2, 64);
+    WriteData(0b11111000);
+	SetPACA(2, 65);
+    WriteData(0b11111000);
+	SetPACA(2, 66);
+    WriteData(0b11111000);
+	SetPACA(2, 67);
+    WriteData(0b11111000);
+	SetPACA(2, 68);
+    WriteData(0b11111000);
+	SetPACA(2, 69);
+    WriteData(0b11111000);
+	SetPACA(2, 70);
+    WriteData(0b11100000);
+	SetPACA(2, 71);
+    WriteData(0b11100000);
+	SetPACA(2, 72);
+    WriteData(0b11000000);
+	SetPACA(2, 73);
+    WriteData(0b10000000);
+	SetPACA(2, 74);
+    WriteData(0b10000000);
 
-int position_x = 0;
-int position_y = 0;
 
-uint8_t key_pad = 0;
-int correctKeyPressed = 0;
+    SetPACA(3, 49);
+    WriteData(0b00000110);
+    SetPACA(3, 50);
+    WriteData(0b11111101);
+    SetPACA(3, 51);
+    WriteData(0b00000111);
+	SetPACA(3, 52);
+    WriteData(0b00000111);
+    SetPACA(3, 53);
+    WriteData(0b00000011);
+    SetPACA(3, 54);
+    WriteData(0b00000001);
+    SetPACA(3, 55);
+    WriteData(0b00011100);
+    SetPACA(3, 56);
+    WriteData(0b10000110);
+    SetPACA(3, 57);
+    WriteData(0b10000110);
+    SetPACA(3, 58);
+    WriteData(0b00000011);
+    SetPACA(3, 59);
+    WriteData(0b00100011);
+    SetPACA(3, 60);
+    WriteData(0b11000001);
+    SetPACA(3, 61);
+    WriteData(0b00000000);
+    SetPACA(3, 62);
+    WriteData(0b00000001);
+    SetPACA(3, 63);
+    WriteData(0b00011111);
+    SetPACA(3, 64);
+    WriteData(0b00111111);
+    SetPACA(3, 65);
+    WriteData(0b10111111);
+    SetPACA(3, 66);
+    WriteData(0b00011111);
+    SetPACA(3, 67);
+    WriteData(0b00001111);
+    SetPACA(3, 68);
+    WriteData(0b00000001);
+    SetPACA(3, 69);
+    WriteData(0b00100001);
+    SetPACA(3, 70);
+    WriteData(0b00000011);
+    SetPACA(3, 71);
+    WriteData(0b00000111);
+    SetPACA(3, 72);
+    WriteData(0b10001111);
+    SetPACA(3, 73);
+    WriteData(0b11111111);
 
 
-//------------------------------------------------------------------------------------------------------------------------------------
-/*********************************** [ MAIN PROGRAM ] ************************************/
-//------------------------------------------------------------------------------------------------------------------------------------
+    SetPACA(4, 50);
+    WriteData(0b00000001);
+    SetPACA(4, 51);
+    WriteData(0b00001110);
+    SetPACA(4, 52);
+    WriteData(0b00001100);
+    SetPACA(4, 53);
+    WriteData(0b01110000);
+    SetPACA(4, 54);
+    WriteData(0b10000001);
+    SetPACA(4, 55);
+    WriteData(0b00110000);
+    SetPACA(4, 59);
+    WriteData(0b00110000);
+    SetPACA(4, 62);
+    WriteData(0b01000000);
+    SetPACA(4, 63);
+    WriteData(0b01000000);
+    SetPACA(4, 66);
+    WriteData(0b10000000);
+    SetPACA(4, 67);
+    WriteData(0b00001000);
+    SetPACA(4, 70);
+    WriteData(0b10000001);
+    SetPACA(4, 71);
+    WriteData(0b01110000);
+    SetPACA(4, 72);
+    WriteData(0b00001110);
 
-int main(void)
-{
-	// start system configs
-	System_Config();
-	SPI3_Config();
-	
-	// start LCD configs
-	LCD_start();
-	LCD_clear();
+    SetPACA(5, 54);
+    WriteData(0b00000001);
+    SetPACA(5, 55);
+    WriteData(0b00000110);
+    SetPACA(5, 56);
+    WriteData(0b00001000);
+    SetPACA(5, 57);
+    WriteData(0b00001000);
+    SetPACA(5, 58);
+    WriteData(0b00010001);
+    SetPACA(5, 59);
+    WriteData(0b01100000);
+    SetPACA(5, 60);
+    WriteData(0b01001000);
+    SetPACA(5, 61);
+    WriteData(0b10000001);
+    SetPACA(5, 62);
+    WriteData(0b10000000);
+    SetPACA(5, 63);
+    WriteData(0b10000000);
+    SetPACA(5, 64);
+    WriteData(0b01000000);
+    SetPACA(5, 65);
+    WriteData(0b01100000);
+    SetPACA(5, 66);
+    WriteData(0b00110000);
+    SetPACA(5, 67);
+    WriteData(0b00001000);
+    SetPACA(5, 68);
+    WriteData(0b00000100);
+    SetPACA(5, 69);
+    WriteData(0b00000010);
+    SetPACA(5, 70);
+    WriteData(0b00000001);
+}
 
-	// set starting game state
-	gameState = WELCOME_SCR;
 
-	while (1)
-	{
-		switch (gameState)
-		{
-			case WELCOME_SCR:
-				displayWelcome();
-				break;
+//Pisang
+void panah_atas(void){
+	SetPACA(2, 48);
+    WriteData(0b11111100);
+	SetPACA(2, 49);
+    WriteData(0b11111100);
+	SetPACA(2, 50);
+    WriteData(0b00000011);
+    SetPACA(2, 51);
+    WriteData(0b00000011);
+    SetPACA(2, 52);
+    WriteData(0b00000011);
+    SetPACA(2, 53);
+    WriteData(0b0001100);
+	SetPACA(2, 54);
+    WriteData(0b01110000);
+    SetPACA(2, 55);
+    WriteData(0b01110000);
+    SetPACA(2, 56);
+    WriteData(0b01110000);
+    SetPACA(2, 57);
+    WriteData(0b10000000);
+	SetPACA(2, 61);
+    WriteData(0b10000000);
+	SetPACA(2, 62);
+    WriteData(0b10000000);
+    SetPACA(2, 63);
+    WriteData(0b01110000);
+	SetPACA(2, 64);
+    WriteData(0b01110000);
+	SetPACA(2, 65);
+    WriteData(0b01110000);
+	SetPACA(2, 66);
+    WriteData(0b01110000);
+	SetPACA(2, 67);
+    WriteData(0b01110000);
+	SetPACA(2, 68);
+    WriteData(0b01110000);
+	SetPACA(2, 69);
+    WriteData(0b01110000);
 
-			case TUTORIAL_SCR:
-				displayTutorial();
-				break;
+    SetPACA(3, 48);
+    WriteData(0b00000111);
+    SetPACA(3, 49);
+    WriteData(0b00000111);
+    SetPACA(3, 50);
+    WriteData(0b00011000);
+    SetPACA(3, 51);
+    WriteData(0b01100000);
+	SetPACA(3, 52);
+    WriteData(0b01100000);
+    SetPACA(3, 53);
+    WriteData(0b10000000);
+    SetPACA(3, 54);
+    WriteData(0b10000000);
+    SetPACA(3, 55);
+    WriteData(0b10000000);
+    SetPACA(3, 56);
+    WriteData(0b10000000);
+    SetPACA(3, 57);
+    WriteData(0b10000001);
+    SetPACA(3, 58);
+    WriteData(0b10000110);
+    SetPACA(3, 59);
+    WriteData(0b10000110);
+    SetPACA(3, 60);
+    WriteData(0b01111110);
+    SetPACA(3, 61);
+    WriteData(0b10000001);
+    SetPACA(3, 62);
+    WriteData(0b10000001);
+    SetPACA(3, 63);
+    WriteData(0b10000000);
+    SetPACA(3, 64);
+    WriteData(0b11111000);
+    SetPACA(3, 65);
+    WriteData(0b11111000);
+    SetPACA(3, 66);
+    WriteData(0b00000110);
+    SetPACA(3, 67);
+    WriteData(0b00000110);
+    SetPACA(3, 68);
+    WriteData(0b00000110);
+    SetPACA(3, 69);
+    WriteData(0b00000110);
 
-			case READY_SCR:
-				getReady();
-				break;
 
-			case GAMEPLAY:
-				playGame();
-				break;
+    SetPACA(4, 50);
+    WriteData(0b11100000);
+    SetPACA(4, 51);
+    WriteData(0b00011000);
+    SetPACA(4, 52);
+    WriteData(0b00011000);
+    SetPACA(4, 53);
+    WriteData(0b00000111);
+    SetPACA(4, 54);
+    WriteData(0b10000111);
+    SetPACA(4, 55);
+    WriteData(0b10000111);
+    SetPACA(4, 56);
+    WriteData(0b10000111);
+    SetPACA(4, 57);
+    WriteData(0b10000111);
+    SetPACA(4, 58);
+    WriteData(0b01000111);
+    SetPACA(4, 59);
+    WriteData(0b01000111);
+    SetPACA(4, 60);
+    WriteData(0b11111000);
+    SetPACA(4, 61);
+    WriteData(0b11111111);
+    SetPACA(4, 62);
+    WriteData(0b11111111);
+    SetPACA(4, 63);
+    WriteData(0b11111111);
+    SetPACA(4, 64);
+    WriteData(0b11111111);
+    SetPACA(4, 65);
+    WriteData(0b11111111);
+    SetPACA(4, 66);
+    WriteData(0b11111111);
+    SetPACA(4, 67);
+    WriteData(0b11111000);
+    SetPACA(4, 68);
+    WriteData(0b11111000);
+    SetPACA(4, 69);
+    WriteData(0b11111000);
+    SetPACA(4, 70);
+    WriteData(0b01100000);
+    SetPACA(4, 71);
+    WriteData(0b10000000);
+    SetPACA(4, 72);
+    WriteData(0b10000000);
+    SetPACA(4, 73);
+    WriteData(0b10000000);
 
-			case GAMEOVER:
-				gameOver();
-				break;
-			
-			default:
-				break;
+    SetPACA(5, 50);
+    WriteData(0b00111111);
+    SetPACA(5, 51);
+    WriteData(0b11000000);
+    SetPACA(5, 52);
+    WriteData(0b11000000);
+    SetPACA(5, 53);
+    WriteData(0b00111110);
+    SetPACA(5, 54);
+    WriteData(0b00000001);
+    SetPACA(5, 55);
+    WriteData(0b00000001);
+    SetPACA(5, 56);
+    WriteData(0b00000001);
+    SetPACA(5, 57);
+    WriteData(0b00000001);
+    SetPACA(5, 60);
+    WriteData(0b00000001);
+    SetPACA(5, 61);
+    WriteData(0b00001111);
+    SetPACA(5, 62);
+    WriteData(0b00001111);
+    SetPACA(5, 63);
+    WriteData(0b00011111);
+    SetPACA(5, 64);
+    WriteData(0b11111111);
+    SetPACA(5, 65);
+    WriteData(0b11111111);
+    SetPACA(5, 66);
+    WriteData(0b11111111);
+    SetPACA(5, 67);
+    WriteData(0b11111111);
+    SetPACA(5, 68);
+    WriteData(0b11111111);
+    SetPACA(5, 69);
+    WriteData(0b11111111);
+    SetPACA(5, 70);
+    WriteData(0b11111111);
+    SetPACA(5, 71);
+    WriteData(0b11111111);
+    SetPACA(5, 72);
+    WriteData(0b11111111);
+    SetPACA(5, 73);
+    WriteData(0b11111111);
+    SetPACA(5, 74);
+    WriteData(0b00111110);
+    SetPACA(5, 75);
+    WriteData(0b00111110);
+}
+
+//Semangka
+void panah_bawah(void){
+	SetPACA(2, 48);
+	WriteData(0b10000000);
+	SetPACA(2, 49);
+	WriteData(0b10000000);
+	SetPACA(2, 50);
+	WriteData(0b11100000);
+	SetPACA(2, 51);
+	WriteData(0b11100000);
+	SetPACA(2, 52);
+	WriteData(0b01111100);
+	SetPACA(2, 53);
+	WriteData(0b01111100);
+	SetPACA(2, 54);
+	WriteData(0b00011100);
+	SetPACA(2, 55);
+	WriteData(0b00011100);
+	SetPACA(2, 56);
+	WriteData(0b00100000);
+	SetPACA(2, 57);
+	WriteData(0b00100000);
+	SetPACA(2, 58);
+	WriteData(0b01100000);
+	SetPACA(2, 59);
+	WriteData(0b10000000);
+	SetPACA(2, 60);
+	WriteData(0b10000000);
+
+	SetPACA(3, 48);
+	WriteData(0b11111111);
+	SetPACA(3, 49);
+	WriteData(0b11111111);
+	SetPACA(3, 50);
+	WriteData(0b11111111);
+	SetPACA(3, 51);
+	WriteData(0b11111111);
+	SetPACA(3, 56);
+	WriteData(0b11000110);
+	SetPACA(3, 57);
+	WriteData(0b11000110);
+	SetPACA(3, 58);
+	WriteData(0b11000110);
+	SetPACA(3, 59);
+	WriteData(0b11000000);
+	SetPACA(3, 60);
+	WriteData(0b11000001);
+	SetPACA(3, 61);
+	WriteData(0b00000010);
+	SetPACA(3, 62);
+	WriteData(0b00000110);
+	SetPACA(3, 63);
+	WriteData(0b00001000);
+	SetPACA(3, 64);
+	WriteData(0b00111000);
+	SetPACA(3, 65);
+	WriteData(0b01000000);
+	SetPACA(3, 66);
+	WriteData(0b01000000);
+	SetPACA(3, 67);
+	WriteData(0b11000000);
+
+	SetPACA(4, 48);
+	WriteData(0b00011111);
+	SetPACA(4, 49);
+	WriteData(0b00011111);
+	SetPACA(4, 50);
+	WriteData(0b11111111);
+	SetPACA(4, 51);
+	WriteData(0b11111111);
+	SetPACA(4, 52);
+	WriteData(0b11100000);
+	SetPACA(4, 53);
+	WriteData(0b11100000);
+	SetPACA(4, 62);
+	WriteData(0b01111000);
+	SetPACA(4, 63);
+	WriteData(0b01111000);
+	SetPACA(4, 68);
+	WriteData(0b01100001);
+	SetPACA(4, 69);
+	WriteData(0b01100011);
+	SetPACA(4, 70);
+	WriteData(0b00000100);
+	SetPACA(4, 71);
+	WriteData(0b00011100);
+	SetPACA(4, 72);
+	WriteData(0b00100000);
+	SetPACA(4, 73);
+	WriteData(0b01100000);
+	SetPACA(4, 74);
+	WriteData(0b10000000);
+	SetPACA(4, 75);
+	WriteData(0b10000000);
+
+	SetPACA(5, 50);
+	WriteData(0b00000001);
+	SetPACA(5, 51);
+	WriteData(0b00000001);
+	SetPACA(5, 52);
+	WriteData(0b00000111);
+	SetPACA(5, 53);
+	WriteData(0b00000111);
+	SetPACA(5, 54);
+	WriteData(0b00011111);
+	SetPACA(5, 55);
+	WriteData(0b00011111);
+	SetPACA(5, 56);
+	WriteData(0b00011110);
+	SetPACA(5, 57);
+	WriteData(0b00011110);
+	SetPACA(5, 58);
+	WriteData(0b00011110);
+	SetPACA(5, 59);
+	WriteData(0b11110000);
+	SetPACA(5, 60);
+	WriteData(0b11110000);
+	SetPACA(5, 61);
+	WriteData(0b11110000);
+	SetPACA(5, 62);
+	WriteData(0b11110000);
+	SetPACA(5, 63);
+	WriteData(0b11110000);
+	SetPACA(5, 64);
+	WriteData(0b11110000);
+	SetPACA(5, 65);
+	WriteData(0b11110000);
+	SetPACA(5, 66);
+	WriteData(0b11110000);
+	SetPACA(5, 67);
+	WriteData(0b11110000);
+	SetPACA(5, 68);
+	WriteData(0b11110000);
+	SetPACA(5, 69);
+	WriteData(0b11110000);
+	SetPACA(5, 70);
+	WriteData(0b00111000);
+	SetPACA(5, 71);
+	WriteData(0b00111000);
+	SetPACA(5, 72);
+	WriteData(0b00111110);
+	SetPACA(5, 73);
+	WriteData(0b00111110);
+	SetPACA(5, 74);
+	WriteData(0b00000111);
+	SetPACA(5, 75);
+	WriteData(0b00000111);
+
+}
+
+//Labu Halloween
+void panah_tengah(void){
+
+	SetPACA(2, 53);
+	WriteData(0b10000000);
+	SetPACA(2, 54);
+	WriteData(0b10000000);
+	SetPACA(2, 55);
+	WriteData(0b10000000);
+	SetPACA(2, 56);
+	WriteData(0b01000000);
+	SetPACA(2, 57);
+	WriteData(0b01000000);
+	SetPACA(2, 58);
+	WriteData(0b01000000);
+	SetPACA(2, 59);
+	WriteData(0b01000100);
+	SetPACA(2, 60);
+	WriteData(0b10011110);
+	SetPACA(2, 61);
+	WriteData(0b11111110);
+	SetPACA(2, 62);
+	WriteData(0b11111110);
+	SetPACA(2, 63);
+	WriteData(0b11111000);
+	SetPACA(2, 64);
+	WriteData(0b10000000);
+	SetPACA(2, 65);
+	WriteData(0b01000000);
+	SetPACA(2, 66);
+	WriteData(0b01000000);
+	SetPACA(2, 67);
+	WriteData(0b01000000);
+	SetPACA(2, 68);
+	WriteData(0b01000000);
+	SetPACA(2, 69);
+	WriteData(0b10000000);
+	SetPACA(2, 70);
+	WriteData(0b10000000);
+	SetPACA(2, 71);
+	WriteData(0b10000000);
+
+	SetPACA(3, 48);
+	WriteData(0b11100000);
+	SetPACA(3, 49);
+	WriteData(0b00011100);
+	SetPACA(3, 50);
+	WriteData(0b11100010);
+	SetPACA(3, 51);
+	WriteData(0b00010001);
+	SetPACA(3, 52);
+	WriteData(0b00001101);
+	SetPACA(3, 53);
+	WriteData(0b00000010);
+	SetPACA(3, 54);
+	WriteData(0b00000010);
+	SetPACA(3, 55);
+	WriteData(0b11000000);
+	SetPACA(3, 56);
+	WriteData(0b11100000);
+	SetPACA(3, 57);
+	WriteData(0b11100010);
+	SetPACA(3, 58);
+	WriteData(0b11100010);
+	SetPACA(3, 59);
+	WriteData(0b11000001);
+	SetPACA(3, 65);
+	WriteData(0b11000001);
+	SetPACA(3, 66);
+	WriteData(0b11100010);
+	SetPACA(3, 67);
+	WriteData(0b11100010);
+	SetPACA(3, 68);
+	WriteData(0b11100000);
+	SetPACA(3, 69);
+	WriteData(0b11000000);
+	SetPACA(3, 70);
+	WriteData(0b00000010);
+	SetPACA(3, 71);
+	WriteData(0b00000010);
+	SetPACA(3, 72);
+	WriteData(0b00001101);
+	SetPACA(3, 73);
+	WriteData(0b00010001);
+	SetPACA(3, 74);
+	WriteData(0b11100010);
+	SetPACA(3, 75);
+	WriteData(0b00011100);
+	SetPACA(3, 76);
+	WriteData(0b11100000);
+
+
+	SetPACA(4, 48);
+	WriteData(0b01111111);
+	SetPACA(4, 49);
+	WriteData(0b10000000);
+	SetPACA(4, 50);
+	WriteData(0b00011111);
+	SetPACA(4, 51);
+	WriteData(0b10000000);
+	SetPACA(4, 55);
+	WriteData(0b00000001);
+	SetPACA(4, 56);
+	WriteData(0b00100001);
+	SetPACA(4, 57);
+	WriteData(0b11000001);
+	SetPACA(4, 58);
+	WriteData(0b11000001);
+	SetPACA(4, 59);
+	WriteData(0b10000001);
+	SetPACA(4, 60);
+	WriteData(0b10011000);
+	SetPACA(4, 61);
+	WriteData(0b10011100);
+	SetPACA(4, 62);
+	WriteData(0b10011100);
+	SetPACA(4, 63);
+	WriteData(0b10011100);
+	SetPACA(4, 64);
+	WriteData(0b10011000);
+	SetPACA(4, 65);
+	WriteData(0b10000001);
+	SetPACA(4, 66);
+	WriteData(0b11000001);
+	SetPACA(4, 67);
+	WriteData(0b11000001);
+	SetPACA(4, 68);
+	WriteData(0b00100001);
+	SetPACA(4, 69);
+	WriteData(0b00000001);
+	SetPACA(4, 73);
+	WriteData(0b10000000);
+	SetPACA(4, 74);
+	WriteData(0b00011111);
+	SetPACA(4, 75);
+	WriteData(0b10000000);
+	SetPACA(4, 76);
+	WriteData(0b01111111);
+
+	SetPACA(5, 49);
+	WriteData(0b00000001);
+	SetPACA(5, 50);
+	WriteData(0b00000010);
+	SetPACA(5, 51);
+	WriteData(0b00000100);
+	SetPACA(5, 52);
+	WriteData(0b00000101);
+	SetPACA(5, 53);
+	WriteData(0b00011010);
+	SetPACA(5, 54);
+	WriteData(0b00010010);
+	SetPACA(5, 55);
+	WriteData(0b00010000);
+	SetPACA(5, 56);
+	WriteData(0b00100000);
+	SetPACA(5, 57);
+	WriteData(0b00100000);
+	SetPACA(5, 58);
+	WriteData(0b00100000);
+	SetPACA(5, 59);
+	WriteData(0b00100000);
+	SetPACA(5, 60);
+	WriteData(0b00100001);
+	SetPACA(5, 61);
+	WriteData(0b00100001);
+	SetPACA(5, 62);
+	WriteData(0b00100001);
+	SetPACA(5, 63);
+	WriteData(0b00100001);
+	SetPACA(5, 64);
+	WriteData(0b00100001);
+	SetPACA(5, 65);
+	WriteData(0b00100000);
+	SetPACA(5, 66);
+	WriteData(0b00100000);
+	SetPACA(5, 67);
+	WriteData(0b00100000);
+	SetPACA(5, 68);
+	WriteData(0b00100000);
+	SetPACA(5, 69);
+	WriteData(0b00010000);
+	SetPACA(5, 70);
+	WriteData(0b00010010);
+	SetPACA(5, 71);
+	WriteData(0b00011010);
+	SetPACA(5, 72);
+	WriteData(0b00000101);
+	SetPACA(5, 73);
+	WriteData(0b00000100);
+	SetPACA(5, 74);
+	WriteData(0b00000010);
+	SetPACA(5, 75);
+	WriteData(0b00000001);
+
+}
+
+void kanan(void){
+	clr_all_pannal();
+	panah_kanan();
+	score();
+	nyawa();
+	for (i=0; i<=waktu; i++){
+		temp = Scankey();
+		if(temp == 6){
+			print_lcd(3, "Jawaban Benar");
+			close_seven_segment();
+			buzzer_benar();
+			DrvSYS_Delay(2000000);
+			a++;
+			random();
+		}else if(temp == 2 || temp == 4 || temp == 5 || temp == 8){
+			print_lcd(3, "Jawaban Salah");
+			close_seven_segment();
+			buzzer_salah();
+			DrvSYS_Delay(2000000);
+			life--;
+			random();
+
 		}
+		score();
 	}
-
-	return 0;
+	waktu_habis();
 }
 
-
-
-//------------------------------------------------------------------------------------------------------------------------------------
-//* ------------------ Main state functions ------------- */
-//------------------------------------------------------------------------------------------------------------------------------------
-
-
-void displayWelcome()
-{
-	draw_Bmp64x64(30, 0, 1, 0, bonk_top);
-	while (1)
-	{
-		key_pad = KeyPadScanning();
-
-		// blinking animation
-		draw_Bmp64x64(30, 0, 1, 0, bonk_bot);
-		SysTickDelay(3000000);
-		clear_LCD();
-		key_pad = KeyPadScanning();
-		draw_Bmp64x64(30, 0, 1, 0, bonk_top);
-		SysTickDelay(3000000);
-
-		if (key_pad > 0)
-		{
-			gameState = TUTORIAL_SCR;
-			clear_LCD();
-			break;
+void kiri(void){
+	clr_all_pannal();
+	panah_kiri();
+	score();
+	nyawa();
+	for (i=0; i<=waktu; i++){
+		temp = Scankey();
+		if(temp == 4){
+			print_lcd(3, "Jawaban Benar");
+			close_seven_segment();
+			buzzer_benar();
+			DrvSYS_Delay(2000000);
+			a++;
+			random();
+		}else if(temp == 2 || temp == 6 || temp == 5 || temp == 8){
+			print_lcd(3, "Jawaban Salah");
+			close_seven_segment();
+			buzzer_salah();
+			DrvSYS_Delay(2000000);
+			life--;
+			random();
 		}
+		score();
+	}
+	waktu_habis();
+}
+
+void atas(void){
+	clr_all_pannal();
+	panah_atas();
+	score();
+	nyawa();
+	for (i=0; i<=waktu; i++){
+		temp = Scankey();
+		if(temp == 2){
+			print_lcd(3, "Jawaban Benar");
+			close_seven_segment();
+			buzzer_benar();
+			DrvSYS_Delay(2000000);
+			a++;
+			random();
+		}else if(temp == 6 || temp == 4 || temp == 5 || temp == 8){
+			print_lcd(3, "Jawaban Salah");
+			close_seven_segment();
+			buzzer_salah();
+			DrvSYS_Delay(2000000);
+			life--;
+			random();
+		}
+		score();
+	}
+	waktu_habis();
+}
+
+void bawah(void){
+	clr_all_pannal();
+	panah_bawah();
+	score();
+	nyawa();
+	for (i=0; i<=waktu; i++){
+		temp = Scankey();
+		if(temp == 8){
+			print_lcd(3, "Jawaban Benar");
+			close_seven_segment();
+			buzzer_benar();
+			DrvSYS_Delay(2000000);
+			a++;
+			random();
+		}else if(temp == 6 || temp == 4 || temp == 5 || temp == 2){
+			print_lcd(3, "Jawaban Salah");
+			close_seven_segment();
+			buzzer_salah();
+			DrvSYS_Delay(2000000);
+			life--;
+			random();
+		}
+		score();
+	}
+	waktu_habis();
+}
+
+void tengah(void){
+	clr_all_pannal();
+	panah_tengah();
+	score();
+	nyawa();
+	for (i=0; i<=waktu; i++){
+		temp = Scankey();
+		if(temp == 5){
+			print_lcd(3, "Jawaban Benar");
+			close_seven_segment();
+			buzzer_benar();
+			DrvSYS_Delay(2000000);
+			a++;
+			random();
+		}else if(temp == 6 || temp == 4 || temp == 2 || temp == 8){
+			print_lcd(3, "Jawaban Salah");
+			close_seven_segment();
+			buzzer_salah();
+			DrvSYS_Delay(2000000);
+			life--;
+			random();
+		}
+		score();
+	}
+	waktu_habis();
+}
+
+void nyawa(void){
+	if(life == 0){
+		mati();
+	}else if(life == 5){
+		print_lcd(0, "Nyawa : 5");
+	}else if(life == 4){
+		print_lcd(0, "Nyawa : 4");
+	}else if(life == 3){
+		print_lcd(0, "Nyawa : 3");
+	}else if(life == 2){
+		print_lcd(0, "Nyawa : 2");
+	}else if(life == 1){
+		print_lcd(0, "Nyawa : 1");
 	}
 }
 
-
-void displayTutorial()
-{
-	printS(0, 0, "1  2  3");
-	printS(0, 25, "4  5  6");
-	printS(0, 50, "7  8  9");
-	SysTickDelay(1000000);
-	printS_5x7(65, 8, "Press keypad");
-	printS_5x7(65, 25, "when");
-	draw_Bmp16x16(90, 17, 1, 0, cheem);
-	printS_5x7(65, 42, "appears");
-
-	while (1)
-	{	
-		key_pad = KeyPadScanning();
-		
-		if (key_pad > 0)
-		{
-			gameState = READY_SCR;
-			clear_LCD();
-			break;
-		}
-
+void random(void){
+	while(1){
+		score();
+		nyawa();
+		waktu -= 5;
+		if(waktu <= 50) waktu = 50;
+		angka = i;
+		sat = angka % 10;
+		angka /= 10;
+		pul = angka % 10;
+		angka /= 10;
+		rib = angka % 10;
+		if(sat == 0)kanan();
+		else if(sat == 1)kiri();
+		else if(sat == 2)atas();
+		else if(sat == 3)bawah();
+		else if(sat == 4)tengah();
+		else if(sat == 5)kanan();
+		else if(sat == 6)kiri();
+		else if(sat == 7)atas();
+		else if(sat == 8)bawah();
+		else if(sat == 9)tengah();
 	}
 }
 
-
-void getReady()
-{
-	printS(30, 25, "GET READY!");
-	SysTickDelay(7000000);
-	LCD_clear();
-	printS(60, 25, "3");
-	SysTickDelay(6000000);
-	printS(60, 25, "2");
-	SysTickDelay(6000000);
-	printS(60, 25, "1");
-	SysTickDelay(6000000);
-	LCD_clear();
-	gameState = GAMEPLAY;
+void score(void){
+	angka1  = a;
+	sat1 = angka1%10;
+	angka1 /= 10;
+	pul1 = angka1%10;
+	angka1 /= 10;
+	rat1 = angka1%10;
+	angka1 /= 10;
+	rib1 = angka1%10;
+	close_seven_segment();
+	show_seven_segment(0, sat1);
+	DrvSYS_Delay(1000);
+	close_seven_segment();
+	show_seven_segment(1, pul1);
+	DrvSYS_Delay(1000);
+	close_seven_segment();
+	show_seven_segment(2, life);
+	DrvSYS_Delay(1000);
+	close_seven_segment();
+	show_seven_segment(3, 0);
+	DrvSYS_Delay(1000);
 }
 
+void mati(void){
+	clr_all_pannal();
+		score();
+		print_lcd(1,"    Game Over");
+		print_lcd(2,"   Ulangi Lagi");
 
-void playGame()
-{
-	// reset game stats
-	clear_LCD();
-	score = 0;
-	lives = 5;
-	spriteDelayTime = 4000000;
+	DrvGPIO_ClrBit(E_GPB, 11);
+	DrvSYS_Delay(1000000);
+	DrvGPIO_SetBit(E_GPB, 11);
+	DrvSYS_Delay(100000);
+	DrvGPIO_ClrBit(E_GPB, 11);
+	DrvSYS_Delay(1000000);
+	DrvGPIO_SetBit(E_GPB, 11);
+	DrvSYS_Delay(100000);
+	DrvGPIO_ClrBit(E_GPB, 11);
+	DrvSYS_Delay(100000);
+	DrvGPIO_SetBit(E_GPB, 11);
+	DrvSYS_Delay(1000000);
 
-	// display game stats
-	printS_5x7(85, 8, "Score:");
-	printS(93, 20, "0");
-	printS_5x7(85, 40, "Lives:");
-	printS(93, 49, "5");
+	while(1){
+			score();
+			print_lcd(1,"    Game Over");
+			print_lcd(2,"   Ulangi Lagi");
 
-	while (1)
-	{
-		drawGroundSprites();
-		SysTickDelay(spriteDelayTime);
-
-		// get a random index
-		randomIndex = randInt(9);
-
-		// calculate a random cheem appear coordinates from random index
-		position_x = randomIndex % 3;
-		position_y = randomIndex / 3;
-
-		// clear ground
-		clearActiveSprite(); 
-
-		// draw cheem at x,y coordinates
-		draw_Bmp16x16(24*position_x+3, 22*position_y+1, 1, 1, cheem);
-		
-		scanKeyPad();			// scan 1
-		SysTickDelay(spriteDelayTime);
-		scanKeyPad();			// scan 2
-		clearActiveSprite();	// clear cheem
-		scanKeyPad();			// scan 3
-
-		// update score and lives
-		if (correctKeyPressed == 1)
-		{
-			++score;
 		}
-		else
-		{
-			--lives;
-		}
-
-		// convert game stats from int to char
-		sprintf(scoreChar, "%d", score);
-		sprintf(livesChar, "%d", lives);
-
-		// display score and lives
-		printS(93, 20, scoreChar);
-		printS(93, 49, livesChar);
-
-		// reset keyPressed flag
-		correctKeyPressed = 0;	
-
-		// game gets faster over time
-		if (spriteDelayTime > 300000)
-		{
-			spriteDelayTime -= 60000; // 1.5% increase
-		}
-		else
-		{
-			spriteDelayTime = 4000000;
-		}
-
-		// lose condition
-		if (lives == 0)
-		{
-			gameState = GAMEOVER;
-			LCD_clear();
-			break;
-		}
-
-		// update high score
-		if (score > highScore)
-		{
-			highScore = score;
-		}
-
-	}
 }
 
-
-void gameOver()
-{
-	clear_LCD();
-	// display score
-	printS_5x7(0, 0, "Your score");
-	printS_5x7(10, 10, scoreChar);
-	sprintf(highScoreChar, "%d", highScore);
-	printS_5x7(77, 0, "High score");
-	printS_5x7(107, 10, highScoreChar);
-
-	// BONK!!!
-	draw_Bmp32x16(49, 18, 1, 0, bonk_end);
-
-	while (1)
-	{
-		key_pad = KeyPadScanning();
-		
-		// blinking animation
-		printS_5x7(25, 40, "Press any key to");
-		printS_5x7(40, 50, "play again");
-		SysTickDelay(2000000);
-		clear_LCD();
-		key_pad = KeyPadScanning();
-		draw_Bmp32x16(49, 18, 1, 0, bonk_end);
-		printS_5x7(0, 0, "Your score");
-		printS_5x7(10, 10, scoreChar);
-		sprintf(highScoreChar, "%d", highScore);
-		printS_5x7(77, 0, "High score");
-		printS_5x7(107, 10, highScoreChar);
-		SysTickDelay(2000000);
-
-		if (key_pad > 0)
-		{
-			gameState = READY_SCR;
-			clear_LCD();
-			break;
-		}
-
-	}
+void waktu_habis(void){
+	clr_all_pannal();
+	close_seven_segment();
+	print_lcd(1,"    Waktu End");
+	print_lcd(2,"    Coba Lagi");
+	buzzer_salah();
+	life--;
+	DrvSYS_Delay(2000000);
+	score();
+	nyawa();
 }
 
-
-
-//------------------------------------------------------------------------------------------------------------------------------------
-//* ------------------ Utility functions ------------- */
-//------------------------------------------------------------------------------------------------------------------------------------
-
-// Get a random integer from 0 -> max-1
-int randInt(int max)
-{
-    return rand() % max;
+void buzzer_benar(void){
+	DrvGPIO_ClrBit(E_GPA,13);
+	DrvGPIO_ClrBit(E_GPB, 11);
+	DrvSYS_Delay(2000000);
+	DrvGPIO_SetBit(E_GPA,13);
+	DrvGPIO_SetBit(E_GPB, 11);
 }
 
-void clearActiveSprite()
-{
-	for (int y = 0; y < 16; y++)
-	{
-		for (int x = 0; x < 16; x++)
-		{
-			draw_Pixel(24 * position_x + 3 + x, 22 * position_y + 1 + y, 0, 0);
-		}
-	}
+void buzzer_salah(void){
+	DrvGPIO_ClrBit(E_GPA,14);
+
+
+	DrvGPIO_ClrBit(E_GPB, 11);
+	DrvSYS_Delay(100000);
+	DrvGPIO_SetBit(E_GPB, 11);
+	DrvSYS_Delay(100000);
+	DrvGPIO_ClrBit(E_GPB, 11);
+	DrvSYS_Delay(100000);
+	DrvGPIO_SetBit(E_GPB, 11);
+	DrvSYS_Delay(100000);
+	DrvGPIO_ClrBit(E_GPB, 11);
+	DrvSYS_Delay(100000);
+	DrvGPIO_SetBit(E_GPB, 11);
+	DrvSYS_Delay(100000);
+
+	DrvGPIO_SetBit(E_GPA,14);
+
 }
 
-void drawGroundSprites()
-{
-	for (int y = 0; y < 3; y++)
-	{
-		for (int x = 0; x < 3; x++)
-		{
-			draw_Bmp16x16(24 * x + 3, 22 * y + 1, 1, 0, ground);
-		}
-	}
+void pembuka(void){
+	print_lcd(0,"Tugas Akhir TMA");
+	print_lcd(1,"  Game NUC140");
+	print_lcd(2,"  Kelompok 10");
+	print_lcd(3,"   Buahahaha");
+	DrvSYS_Delay(2500000);
+	DrvSYS_Delay(2500000);
+	DrvSYS_Delay(2500000);
+	clr_all_pannal();
+//	print_lcd(0,"Percobaan Game");
+	print_lcd(1,"Hafalkan gambar");
+	print_lcd(2,"   berikut!!");
+//	print_lcd(3,"Mikrokontroller");
+	DrvSYS_Delay(2500000);
+	DrvSYS_Delay(2500000);
+	DrvSYS_Delay(2500000);
+	clr_all_pannal();
+	print_lcd(0,"      Apel");
+	panah_kanan();
+	print_lcd(7,"     Nomor 6");
+	DrvSYS_Delay(2500000);
+	DrvSYS_Delay(2500000);
+	clr_all_pannal();
+	print_lcd(0,"   Strawberry");
+	panah_kiri();
+	print_lcd(7,"     Nomor 4");
+	DrvSYS_Delay(2500000);
+	DrvSYS_Delay(2500000);
+	clr_all_pannal();
+	print_lcd(0,"     Pisang");
+	panah_atas();
+	print_lcd(7,"     Nomor 2");
+	DrvSYS_Delay(2500000);
+	DrvSYS_Delay(2500000);
+	clr_all_pannal();
+	print_lcd(0,"    Semangka");
+	panah_bawah();
+	print_lcd(7,"     Nomor 8");
+	DrvSYS_Delay(2500000);
+	DrvSYS_Delay(2500000);
+	clr_all_pannal();
+	print_lcd(0,"      Labu");
+	panah_tengah();
+	print_lcd(7,"     Nomor 5");
+	DrvSYS_Delay(2500000);
+	DrvSYS_Delay(2500000);
+	clr_all_pannal();
+//	print_lcd(1,"  Bersiap-siap");
+//	print_lcd(2,"        5");
+//	DrvSYS_Delay(2500000);
+//	print_lcd(2,"        4");
+//	DrvSYS_Delay(2500000);
+//	print_lcd(2,"        3");
+//	DrvSYS_Delay(2500000);
+//	print_lcd(2,"        2");
+//	DrvSYS_Delay(2500000);
+//	print_lcd(2,"        1");
+//	DrvSYS_Delay(2500000);
+//	clr_all_pannal();
+//	print_lcd(1,"       Mulai!");
+//	DrvSYS_Delay(2500000);
 }
 
-void scanKeyPad()
-{
-	key_pad = KeyPadScanning();
-
-	// detect correct key pressed
-	if (key_pad - 1 == randomIndex)
-	{
-		correctKeyPressed = 1;
-	}
-}
-
-
-
-//------------------------------------------------------------------------------------------------------------------------------------
-//* ------------------ System functions ------------- */
-//------------------------------------------------------------------------------------------------------------------------------------
-void LCD_start(void)
-{
-	LCD_command(0xE2); // Set system reset
-	LCD_command(0xA1); // Set Frame rate 100 fps
-	LCD_command(0xEB); // Set LCD bias ratio E8~EB for 6~9 (min~max)
-	LCD_command(0x81); // Set V BIAS potentiometer
-	LCD_command(0xA0); // Set V BIAS potentiometer: A0 ()
-	LCD_command(0xC0);
-	LCD_command(0xAF); // Set Display Enable
-}
-
-void LCD_command(unsigned char temp)
-{
-	SPI3->SSR |= 1ul << 0;
-	SPI3->TX[0] = temp;
-	SPI3->CNTRL |= 1ul << 0;
-	while (SPI3->CNTRL & (1ul << 0))
-		;
-	SPI3->SSR &= ~(1ul << 0);
-}
-
-void LCD_data(unsigned char temp)
-{
-	SPI3->SSR |= 1ul << 0;
-	SPI3->TX[0] = 0x0100 + temp;
-	SPI3->CNTRL |= 1ul << 0;
-	while (SPI3->CNTRL & (1ul << 0))
-		;
-	SPI3->SSR &= ~(1ul << 0);
-}
-
-void LCD_clear(void)
-{
-	int16_t i;
-	LCD_SetAddress(0x0, 0x0);
-	for (i = 0; i < 132 * 8; i++)
-	{
-		LCD_data(0x00);
-	}
-}
-
-void LCD_SetAddress(uint8_t PageAddr, uint8_t ColumnAddr)
-{
-	LCD_command(0xB0 | PageAddr);
-	LCD_command(0x10 | (ColumnAddr >> 4) & 0xF);
-	LCD_command(0x00 | (ColumnAddr & 0xF));
-}
-
-void KeyPadEnable(void)
-{
-	GPIO_SetMode(PA, BIT0, GPIO_MODE_QUASI);
-	GPIO_SetMode(PA, BIT1, GPIO_MODE_QUASI);
-	GPIO_SetMode(PA, BIT2, GPIO_MODE_QUASI);
-	GPIO_SetMode(PA, BIT3, GPIO_MODE_QUASI);
-	GPIO_SetMode(PA, BIT4, GPIO_MODE_QUASI);
-	GPIO_SetMode(PA, BIT5, GPIO_MODE_QUASI);
-}
-
-uint8_t KeyPadScanning(void)
-{
-	PA0 = 1;
-	PA1 = 1;
-	PA2 = 0;
-	PA3 = 1;
-	PA4 = 1;
-	PA5 = 1;
-	if (PA3 == 0)
-		return 1;
-	if (PA4 == 0)
-		return 4;
-	if (PA5 == 0)
-		return 7;
-	PA0 = 1;
-	PA1 = 0;
-	PA2 = 1;
-	PA3 = 1;
-	PA4 = 1;
-	PA5 = 1;
-	if (PA3 == 0)
-		return 2;
-	if (PA4 == 0)
-		return 5;
-	if (PA5 == 0)
-		return 8;
-	PA0 = 0;
-	PA1 = 1;
-	PA2 = 1;
-	PA3 = 1;
-	PA4 = 1;
-	PA5 = 1;
-	if (PA3 == 0)
-		return 3;
-	if (PA4 == 0)
-		return 6;
-	if (PA5 == 0)
-		return 9;
-	return 0;
-}
-
-void System_Config(void)
-{
-	SYS_UnlockReg(); // Unlock protected registers
-	CLK->PWRCON |= (0x01ul << 0);
-	while (!(CLK->CLKSTATUS & (1ul << 0)))
-		;
-	//PLL configuration starts
-	CLK->PLLCON &= ~(1ul << 19); //0: PLL input is HXT
-	CLK->PLLCON &= ~(1ul << 16); //PLL in normal mode
-	CLK->PLLCON &= (~(0x01FFul << 0));
-	CLK->PLLCON |= 48;
-	CLK->PLLCON &= ~(1ul << 18); //0: enable PLLOUT
-	while (!(CLK->CLKSTATUS & (0x01ul << 2)))
-		;
-	//PLL configuration ends
-	//clock source selection
-	CLK->CLKSEL0 &= (~(0x07ul << 0));
-	CLK->CLKSEL0 |= (0x02ul << 0);
-	//clock frequency division
-	CLK->CLKDIV &= (~0x0Ful << 0);
-	//STCLK as SysTick clock source
-	SysTick->CTRL &= ~(0x01ul << 2);
-	//STCLK = HCLK/2 = 1MHz
-	CLK->CLKSEL0 &= ~(0x07ul << 3);
-	CLK->CLKSEL0 |= (0x02ul << 3);
-	//enable clock of SPI3
-	CLK->APBCLK |= 1ul << 15;
-	SYS_LockReg(); // Lock protected registers
-}
-
-void SPI3_Config(void)
-{
-	SYS->GPD_MFP |= 1ul << 11;	 //1: PD11 is configured for alternative function
-	SYS->GPD_MFP |= 1ul << 9;	 //1: PD9 is configured for alternative function
-	SYS->GPD_MFP |= 1ul << 8;	 //1: PD8 is configured for alternative function
-	SPI3->CNTRL &= ~(1ul << 23); //0: disable variable clock feature
-	SPI3->CNTRL &= ~(1ul << 22); //0: disable two bits transfer mode
-	SPI3->CNTRL &= ~(1ul << 18); //0: select Master mode
-	SPI3->CNTRL &= ~(1ul << 17); //0: disable SPI interrupt
-	SPI3->CNTRL |= 1ul << 11;	 //1: SPI clock idle high
-	SPI3->CNTRL &= ~(1ul << 10); //0: MSB is sent first
-	SPI3->CNTRL &= ~(3ul << 8);	 //00: one transmit/receive word will be executed in one data transfer
-	SPI3->CNTRL &= ~(31ul << 3); //Transmit/Receive bit length
-	SPI3->CNTRL |= 9ul << 3;	 //9: 9 bits transmitted/received per data transfer
-	SPI3->CNTRL |= (1ul << 2);	 //1: Transmit at negative edge of SPI CLK
-	SPI3->DIVIDER = 0;			 // SPI clock divider. SPI clock = HCLK / ((DIVIDER+1)*2). HCLK = 50 MHz
-}
-
-void SysTickDelay(uint32_t SYSTICK_LVR)
-{
-	//SysTick Reload Value
-	SysTick->LOAD = SYSTICK_LVR - 1;
-	//SysTick to count from LVR
-	SysTick->VAL = 0;
-	//Start SysTick
-	SysTick->CTRL |= (0x01ul << 0);
-	while (!(SysTick->CTRL & (0x01ul << 16)))
-		;
+void Init();
+int main(void){
+    Init();
+    UNLOCKREG();
+    DrvSYS_SetOscCtrl(E_SYS_XTL12M, 1);
+    DrvSYS_Delay(5000);
+    DrvSYS_SelectHCLKSource(0);
+    LOCKREG();
+    DrvSYS_SetClockDivider(E_SYS_HCLK_DIV, 0);
+    Initial_pannel();
+    clr_all_pannal();
+    DrvGPIO_ClrBit(E_GPD, 14);
+    OpenKeyPad();
+    while(1){
+    	tegangan = ((float)adc/4096) * 5000;
+    	pembuka();
+    	random();
+    }
 }
